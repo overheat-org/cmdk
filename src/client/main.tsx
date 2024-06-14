@@ -1,54 +1,52 @@
-import './global.css';
-import { Command } from 'cmdk';
-import React from 'react';
-import ReactDOM from 'react-dom';
+Object.assign(global, { _JSX: React.createElement });
 
-console.log("STARTING COMPILATION")
+import './global.css';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import QuickSwitcher from './quickswitcher';
+
+function Layer({ open }) {
+    return (
+        <div className='layer_c14d31'>
+            <div className='focusLock__28507'>
+                <div className='container_a35729 root_a28985 rootWithShadow_d20cd6' style={{ opacity: 1, transform: 'scale(1)' }}>
+                    <QuickSwitcher open={open} />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function App() {
-	const [open, setOpen] = React.useState(false);
-	const container = React.useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false);
 
-	React.useEffect(() => {
-		const KDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.key === "k") {
-				e.preventDefault();
-				e.stopPropagation();
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            e.preventDefault();
 
-				setOpen((open) => !open);
-			}
-		}
-		document.addEventListener("keydown", KDown)
-		return () => document.removeEventListener("keydown", KDown)
-	}, [])
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.stopPropagation();
+                setOpen((open) => !open);
+            }
+            else if(e.key == 'Escape' && open) {
+                e.stopPropagation();
+                setOpen(false);
+            }
+        };
 
-	return (
-		<div className='layerContainer_a2fcaa' style={{ display: open ? 'block' : 'none' }}>
-			<div className="backdrop__1a911 withLayer__29ace" style={{background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(0px)' }} />
-			<div className='layer_c14d31'>
-				<div className='focusLock__28507'>
-					<Command
-						className='quickswitcher_b5bb0a'
-						label="Global Command Menu"
-					>
-						<Command.Input className='input__2a648' />
-						<Command.List>
-							<Command.Empty>No results found.</Command.Empty>
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
-							<Command.Group heading="Letters">
-								<Command.Item>a</Command.Item>
-								<Command.Item>b</Command.Item>
-								<Command.Separator />
-								<Command.Item>c</Command.Item>
-							</Command.Group>
-
-							<Command.Item>Apple</Command.Item>
-						</Command.List>
-					</Command>
-				</div>
-			</div>
-		</div>
-	)
+    return (
+        <div className='layerContainer_a2fcaa' style={{ display: open ? 'block' : 'none' }}>
+          <div 
+            className='backdrop__1a911 withLayer__29ace'
+            style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(0px)' }} 
+          />;
+          <Layer open={open} />
+        </div>
+    );
 }
 
 const overheatElem = document.createElement('overheat');
