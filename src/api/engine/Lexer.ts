@@ -8,7 +8,7 @@ const isNumber = (code: number) => code >= 48 && code <= 57;
 export class BaseToken {
   constructor(
     public type: TokenType,
-    public value?: unknown
+    public value?: string | number
   ) { }
 }
 export class Token extends BaseToken {
@@ -25,34 +25,37 @@ function Lexer(source: string) {
   const next = () => source[++i] ?? '\0';
   const peek = () => source[i + 1] ?? '\0';
   const save = (tokenData: BaseToken) => tokens.push(new Token(tokenData.type, tokenData.value));
+  const makeKeyword = (text: string) => void save({ type: TokenType.Keyword, value: text });
+  const isKeyword = (text: string) => commandNames.find(n => n == text);
+  const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
+  const makeNumber = () => {
+    let number = curr();
+
+    const isNumber = (charCode: number) => {
+      return charCode >= 48 && charCode <= 57;
+    };
+
+    const readDigits = () => {
+      if (isNumber(next().charCodeAt(0))) {
+        number += curr();
+        readDigits();
+      }
+    };
+
+    if (number === '0' && (peek() === 'b' || peek() === 'x')) {
+      number += next();
+      readDigits();
+    } else {
+      readDigits();
+    }
+
+    save({ type: TokenType.Number, value: Number(number) });
+    next();
+  };
 
   while (i <= source.length) {
     const current = curr();
 
-    const makeNumber = () => {
-      let number = curr();
-
-      const isNumber = (charCode: number) => {
-        return charCode >= 48 && charCode <= 57;
-      };
-
-      const readDigits = () => {
-        if (isNumber(next().charCodeAt(0))) {
-          number += curr();
-          readDigits();
-        }
-      };
-
-      if (number === '0' && (peek() === 'b' || peek() === 'x')) {
-        number += next();
-        readDigits();
-      } else {
-        readDigits();
-      }
-
-      save({ type: TokenType.Number, value: Number(number) });
-      next();
-    };
     const makeString = () => {
       const quote = current;
       let value = "";
@@ -67,16 +70,14 @@ function Lexer(source: string) {
     const makeText = () => {
       let text = current;
 
-      while (isText(next().charCodeAt(0))) {
+      const dashCode = 45; // -
+
+      while (isText(next().charCodeAt(0)) || next().charCodeAt(0) == dashCode) {
         text += curr();
       }
 
       return next(), text;
     }
-    const makeKeyword = (text: string) => void save({ type: TokenType.Keyword, value: text });
-    const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
-
-    const isKeyword = (text: string) => commandNames.find(n => n == text);
 
     switch (current) {
       case ' ':
@@ -125,9 +126,9 @@ function Lexer(source: string) {
     }
   }
 
-    save({ type: TokenType.End });
+  save({ type: TokenType.End });
 
-    return tokens;
-  }
+  return tokens;
+}
 
-  export default Lexer;
+export default Lexer;

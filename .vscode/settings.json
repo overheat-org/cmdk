@@ -1,15 +1,15 @@
 {
-  "ocaml.sandbox": {
-    "kind": "global"
-},
-"files.exclude": {
-	"**/.git": true,
-	"**/.svn": true,
-	"**/.hg": true,
-	"**/CVS": true,
-	"**/.DS_Store": true
-},
-"hide-files.files": [],
-"hidefiles.configurationType": "global",
-"hidefiles.selectedProfile": "Show All Files"
+	"ocaml.sandbox": {
+		"kind": "global"
+	},
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true
+	},
+	"hide-files.files": [],
+	"hidefiles.configurationType": "global",
+	"hidefiles.selectedProfile": "Show All Files"
 }

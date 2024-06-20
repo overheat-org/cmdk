@@ -1,41 +1,62 @@
 export enum ElementType {
-  Keyword,
+	Keyword,
 	Option
 }
 
-function KeywordElement(props, _children) {
-  const children = new Array<any>()
-  const options = new Array<any>();
-  let run: null | ((...args: any[]) => any) = null; 
+export class Keyword {
+	children = new Map<string, Keyword>();
+	options: { [key: string]: unknown } = {};
+	run?: ((...args: any[]) => any);
+	
+	constructor(
+		public id: string
+	) {}
+}
 
-  for (const child of _children) {
-    if(child.type == ElementType.Keyword) {
-      children.push(child);
-    } else if(child.type == ElementType.Option) {
-      options.push(child);
-    } else {
-      run = child;
-    }
-  }
+export class Option {
+	autocomplete = false;
+	children = new Map<string, Keyword>();
+	
+	constructor(
+		public id: string,
+		public type: string
+	) {}
+}
 
-	return {
-		type: ElementType.Keyword,
-    children,
-    ...props
+function KeywordElement(props, children) {
+	const keyword = new Keyword(props.id);
+
+	for (const child of children) {
+		switch (child.type) {
+			case ElementType.Keyword:
+				keyword.children.set(child.id, child);
+				break;
+
+			case ElementType.Option:
+				keyword.options[child.id] = child.value;
+				break;
+
+			default:
+				keyword.run = child;
+				break;
+		}
 	}
+
+	return keyword;
 }
 
 function OptionElement(props, children) {
-	return {
-		type: ElementType.Option,
-		children,
-		...props
-	}
+	const option = new Option(props.id, props.type);
+
+	if(props.autocomplete) 
+		option.autocomplete = true;
+	
+	return option;
 }
 
 const elementsMap = {
-  keyword: KeywordElement,
-  opt: OptionElement
+	keyword: KeywordElement,
+	opt: OptionElement
 }
 
 function _JSX(type: string, props, ...children) {
@@ -47,7 +68,7 @@ Object.assign(global, { _JSX });
 type CmdResovableReturn = JSX.Element | ((opts: any) => unknown);
 
 declare global {
-  type _JSX = typeof _JSX;
+	type _JSX = typeof _JSX;
 
 	namespace JSX {
 		interface IntrinsicElements {

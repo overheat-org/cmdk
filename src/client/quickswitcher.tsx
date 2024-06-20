@@ -12,7 +12,7 @@ function CommandItem({ command }) {
 function QuickSwitcher({ open }) {
   const [element, setElement] = useState();
   const [search, setSearch] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<unknown[]>([]);
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
