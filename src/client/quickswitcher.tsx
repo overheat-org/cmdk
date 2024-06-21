@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as api from '../api';
+import engine from '../api/engine';
 
 function CommandItem({ command }) {
   return (
-    <li className='result__25f11' onSelect={command.run}>
+    <li className='result' onSelect={command.run}>
       {command.toString()}
     </li>
   );
@@ -34,20 +34,16 @@ function QuickSwitcher({ open }) {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
+    const result = engine.search(searchTerm);
+    console.log({result});
     setSearch(searchTerm);
 
-    let filteredResults = Array.from(api.commands.values());
-    if (searchTerm.length > 0) filteredResults = filteredResults.filter(command =>
-      command.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
-    const result = filteredResults.find(r => r === searchTerm);
-
-    if(result) {
-      setElement(result);
-    }
+    // if(result) {
+    //   setElement(result);
+    // }
     
-    setResults(filteredResults);
+    // setResults(filteredResults);
   };
 
   const mappedCommands = results.map((command, index) => (
@@ -55,23 +51,19 @@ function QuickSwitcher({ open }) {
   ));
 
   return (
-    <div className='quickswitcher_b5bb0a'>
+    <div className='quickswitcher'>
       <input
         ref={inputRef}
-        className='input__2a648'
+        className='input'
         onChange={handleSearch}
         value={search}
         onKeyDown={handleKeyDown}
       />
-      <div className='scroller_d4b86c auto_a3c0bd scrollerBase_f742b2'>
+      <div className='scroller scrollerBase'>
         {mappedCommands}
       </div>
     </div>
   );
-}
-
-function getTokens() {
-  
 }
 
 export default QuickSwitcher;
