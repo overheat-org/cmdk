@@ -1,6 +1,6 @@
 export class ScriptNode {
   kind = 'Script' as const;
-  children = new Array<Node>();
+  children?: Node;
 }
 
 export class KeywordNode {

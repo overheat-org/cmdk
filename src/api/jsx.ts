@@ -3,10 +3,12 @@ export enum ElementType {
 	Option
 }
 
+// TODO: As classes Keyword e Option estão me incomodando, parecem estar no lugar errado
+
 export class Keyword {
 	children = new Map<string, Keyword>();
 	options: { [key: string]: unknown } = {};
-	run?: ((...args: any[]) => any);
+	run?: (...args: any[]) => any;
 	
 	constructor(
 		public id: string
@@ -65,7 +67,7 @@ function _JSX(type: string, props, ...children) {
 
 Object.assign(global, { _JSX });
 
-type CmdResovableReturn = JSX.Element | ((opts: any) => unknown);
+type CmdResolvableReturn = JSX.Element | ((opts: any) => unknown);
 
 declare global {
 	type _JSX = typeof _JSX;
@@ -74,7 +76,7 @@ declare global {
 		interface IntrinsicElements {
 			keyword: {
 				id: string,
-				children: CmdResovableReturn | CmdResovableReturn[]
+				children: CmdResolvableReturn | CmdResolvableReturn[]
 			},
 			opt: {
 				id: string,

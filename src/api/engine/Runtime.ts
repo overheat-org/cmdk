@@ -1,23 +1,18 @@
-import { Api } from "@lib/discord";
 import { ScriptNode, Node, ChannelExpressionNode, IdentifierNode, KeywordNode, PathExpressionNode, UserExpressionNode } from "./Ast";
 import { commands } from "@api";
 import { Keyword, Option } from "../jsx";
 
 class RuntimeError extends Error {}
-interface RuntimeContext {
-  [key: string]: any;
-}
 
 function Runtime(ast: ScriptNode) {
-  const context: RuntimeContext = {};
   let lastKeyword: Keyword | Option;
 
   return evaluate(ast);
 
-  function evaluate(node: Node): unknown {
+  function evaluate(node: Node): mkUnion {
     switch (node.kind) {
       case "Script":
-        return node.children.map(evaluate);
+        return evaluate(node.children!) as mkUnion;
 
       case "Keyword":
         return evaluateKeyword(node);
@@ -35,45 +30,75 @@ function Runtime(ast: ScriptNode) {
         return evaluatePathExpression(node);
 
       case "StringLiteral":
-        return node.value;
+        return mkStr(node.value);
 
       case "NumberLiteral":
-        return node.value;
+        return mkNum(node.value);
 
       default:
         throw new RuntimeError(`Unknown AST node kind: ${node['kind']}`);
     }
   }
 
-  function evaluateKeyword(node: KeywordNode): any {
+  function evaluateKeyword(node: KeywordNode): mkUnion {
     const { id, options, children } = node;
 
-    const command = lastKeyword ? lastKeyword.children.get(id) : commands.get(id);
+    // TODO: tratar melhor este erro aqui
+    const commandResolvable = lastKeyword ? lastKeyword.children.get(id) : commands.get(id);
+    if(!commandResolvable) throw 'Command not found';
 
-    if(!command) throw 'Command not found';
+    lastKeyword = commandResolvable;
  
-    if(children) evaluate(children);
-    else (lastKeyword as Keyword).run?.();
+    if(children) return evaluate(children) as any;
+
+    const fn = (lastKeyword as Keyword).run;
+    if(!fn) return mkNull();
+    return mkFn(() => fn(options));
   }
 
-  function evaluateIdentifier(node: IdentifierNode): any {
-    const { id } = node;
-    return context[id];
+  function evaluateIdentifier(node: IdentifierNode) {
+    return mkIden(node.id);
   }
 
-  function evaluateUserExpression(node: UserExpressionNode): any {
-    const { name } = node;
+  function evaluateUserExpression(node: UserExpressionNode) {
+    return mkNull();
   }
 
-  function evaluateChannelExpression(node: ChannelExpressionNode): any {
-    const { name } = node;
-    return null;
+  function evaluateChannelExpression(node: ChannelExpressionNode) {
+    return mkNull();
   }
 
-  function evaluatePathExpression(node: PathExpressionNode): any {
-    const { path } = node;
-    return path;
+  function evaluatePathExpression(node: PathExpressionNode) {
+    return mkNull();
   }
+}
+
+type mkUnion = ReturnType<
+  | typeof mkFn 
+  | typeof mkNull
+  | typeof mkIden 
+  | typeof mkStr
+  | typeof mkNum
+>
+
+function mkFn(fn: unknown) {
+  return { type: Symbol.for('fn'), value: fn } as const
+}
+
+function mkNull() {
+  return { type: Symbol.for('nil') } as const
+}
+
+function mkIden(identifier: string) {
+  return { type: Symbol.for('iden'), value: identifier } as const
+}
+
+function mkStr(string: string) {
+  return { type: Symbol.for('str'), value: string } as const
+}
+
+function mkNum(number: number) {
+  return { type: Symbol.for('num'), value: number } as const
 }
 
 export default Runtime;

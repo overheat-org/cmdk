@@ -20,10 +20,7 @@ function Parser(source: string) {
   }
 
   const ast = new ScriptNode();
-
-  while (at().type != TokenType.End) {
-    ast.children.push(parse());
-  }
+  ast.children = parse();
 
   return ast;
 

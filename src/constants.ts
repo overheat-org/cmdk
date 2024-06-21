@@ -2,8 +2,8 @@ export const API_VERSION = 'v9';
 export enum OptionTypes {
 	String,
 }
+
 export enum TokenType {
-  End,
   Keyword,
   Number,
   String,
@@ -14,8 +14,13 @@ export enum TokenType {
   Identifier,
   Option, 
 }
+
 export enum Status {
   Error,
   Ok,
   MFA
+}
+
+export enum ZIndex {
+  Overlap = 102
 }

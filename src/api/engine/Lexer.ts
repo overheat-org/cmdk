@@ -1,5 +1,4 @@
-// import { commandNames } from "@api";
-const commandNames = ['app']
+import { commandNames } from "@api";
 import { TokenType } from "@consts";
 
 const isText = (code: number) => (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
@@ -125,8 +124,6 @@ function Lexer(source: string) {
       };
     }
   }
-
-  save({ type: TokenType.End });
 
   return tokens;
 }
