@@ -7,9 +7,9 @@ import QuickSwitcher from './quickswitcher';
 
 function Layer({ open }) {
     return (
-        <div className='layer_c14d31'>
-            <div className='focusLock__28507'>
-                <div className='container_a35729 root_a28985 rootWithShadow_d20cd6' style={{ opacity: 1, transform: 'scale(1)' }}>
+        <div className='layer'>
+            <div className='focusLock'>
+                <div className='container root rootWithShadow' style={{ opacity: 1, transform: 'scale(1)' }}>
                     <QuickSwitcher open={open} />
                 </div>
             </div>
@@ -18,7 +18,7 @@ function Layer({ open }) {
 }
 
 function App() {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,7 +28,7 @@ function App() {
                 e.stopPropagation();
                 setOpen((open) => !open);
             }
-            else if(e.key == 'Escape' && open) {
+            else if(open && e.key == 'Escape') {
                 e.stopPropagation();
                 setOpen(false);
             }
@@ -39,9 +39,9 @@ function App() {
     }, []);
 
     return (
-        <div className='layerContainer_a2fcaa' style={{ display: open ? 'block' : 'none' }}>
+        <div className='layerContainer' style={{ display: open ? 'block' : 'none' }}>
           <div 
-            className='backdrop__1a911 withLayer__29ace'
+            className='backdrop withLayer'
             style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(0px)' }} 
           />;
           <Layer open={open} />

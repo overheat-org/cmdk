@@ -4,6 +4,12 @@ import { Api } from "@lib/discord";
 export default
 
 <keyword id="app">
+  <keyword id="test">
+    {async () => {
+      console.log('TESTING')
+    }}
+  </keyword>
+
 	<keyword id="create">
 		<opt type="string" id="name" />
 
