@@ -1,29 +1,4 @@
-export enum ElementType {
-	Keyword,
-	Option
-}
-
-// TODO: As classes Keyword e Option estão me incomodando, parecem estar no lugar errado
-
-export class Keyword {
-	children = new Map<string, Keyword>();
-	options: { [key: string]: unknown } = {};
-	run?: (...args: any[]) => any;
-	
-	constructor(
-		public id: string
-	) {}
-}
-
-export class Option {
-	autocomplete = false;
-	children = new Map<string, Keyword>();
-	
-	constructor(
-		public id: string,
-		public type: string
-	) {}
-}
+import { Keyword, Option } from "./engine/Elements";
 
 function KeywordElement(props, children) {
 	const keyword = new Keyword(props.id);

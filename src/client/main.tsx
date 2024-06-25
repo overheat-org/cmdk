@@ -3,9 +3,10 @@ Object.assign(global, { _JSX: React.createElement });
 import './global.css';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { engine } from '@api';
+import { Engine } from '@api';
 import { Command } from 'cmdk';
 
+const engine = new Engine();
 const overheatElem = document.createElement('overheat');
 document.body.appendChild(overheatElem);
 

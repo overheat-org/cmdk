@@ -1,7 +1,7 @@
-import { ScriptNode, Node, ChannelExpressionNode, IdentifierNode, KeywordNode, PathExpressionNode, UserExpressionNode } from "./Ast";
+import { ScriptNode, Node, ChannelExpressionNode, KeywordNode, PathExpressionNode, UserExpressionNode } from "./Ast";
 import { commands } from "@api";
-import { Keyword, Option } from "../jsx";
 import { TokenType } from "@consts";
+import { Keyword, Option } from "./Elements";
 
 class RuntimeError extends Error {}
 

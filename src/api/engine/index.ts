@@ -1,13 +1,13 @@
 import { commands } from "@api";
-import { Keyword } from "../jsx";
 import { KeywordNode, Node } from "./Ast";
 import Lexer from "./Lexer";
 import Parser from "./Parser";
 import Runtime from "./Runtime";
 import { TokenType } from "@consts";
+import { Keyword } from "./Elements";
 
 // TODO: Otimizar a engine reutilizando a ast e tokens do search para usar no run e no get
-class Engine {
+export class Engine {
     search(source: string) {
         const tokens = Lexer(source);
         const lastToken = source[source.length - 1] == ' ' ? undefined : tokens.pop()!;
@@ -52,4 +52,4 @@ class Engine {
     }
 }
 
-export default new Engine;
+export * from './Elements';

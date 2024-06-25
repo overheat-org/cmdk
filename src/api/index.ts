@@ -1,5 +1,6 @@
+import { Keyword } from './engine';
+
 export * from './jsx';
-import type { Keyword } from './jsx';
 
 const ctx = require.context("./commands", false);
 
@@ -10,4 +11,4 @@ export const commands = new Map<string, Keyword>(
   })
 );
 
-export { default as engine } from './engine';
+export * from './engine';
