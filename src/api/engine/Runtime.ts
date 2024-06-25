@@ -1,6 +1,7 @@
 import { ScriptNode, Node, ChannelExpressionNode, IdentifierNode, KeywordNode, PathExpressionNode, UserExpressionNode } from "./Ast";
 import { commands } from "@api";
 import { Keyword, Option } from "../jsx";
+import { TokenType } from "@consts";
 
 class RuntimeError extends Error {}
 
@@ -9,16 +10,13 @@ function Runtime(ast: ScriptNode) {
 
   return evaluate(ast);
 
-  function evaluate(node: Node): mkUnion {
+  function evaluate(node: Node): MkUnion {
     switch (node.kind) {
       case "Script":
-        return evaluate(node.children!) as mkUnion;
+        return evaluate(node.children!) as MkUnion;
 
       case "Keyword":
         return evaluateKeyword(node);
-
-      case "Identifier":
-        return evaluateIdentifier(node);
 
       case "UserExpression":
         return evaluateUserExpression(node);
@@ -40,12 +38,11 @@ function Runtime(ast: ScriptNode) {
     }
   }
 
-  function evaluateKeyword(node: KeywordNode): mkUnion {
+  function evaluateKeyword(node: KeywordNode): MkUnion {
     const { id, options, children } = node;
 
-    // TODO: tratar melhor este erro aqui
     const commandResolvable = lastKeyword ? lastKeyword.children.get(id) : commands.get(id);
-    if(!commandResolvable) throw 'Command not found';
+    if(!commandResolvable) return mkNull();
 
     lastKeyword = commandResolvable;
  
@@ -53,11 +50,8 @@ function Runtime(ast: ScriptNode) {
 
     const fn = (lastKeyword as Keyword).run;
     if(!fn) return mkNull();
-    return mkFn(() => fn(options));
-  }
 
-  function evaluateIdentifier(node: IdentifierNode) {
-    return mkIden(node.id);
+    return mkFn(() => fn(options));
   }
 
   function evaluateUserExpression(node: UserExpressionNode) {
@@ -73,7 +67,7 @@ function Runtime(ast: ScriptNode) {
   }
 }
 
-type mkUnion = ReturnType<
+export type MkUnion = ReturnType<
   | typeof mkFn 
   | typeof mkNull
   | typeof mkIden 
@@ -81,24 +75,24 @@ type mkUnion = ReturnType<
   | typeof mkNum
 >
 
-function mkFn(fn: unknown) {
-  return { type: Symbol.for('fn'), value: fn } as const
+function mkFn(fn: (...args: unknown[]) => unknown) {
+  return { type: TokenType.Function, value: fn } as const
 }
 
 function mkNull() {
-  return { type: Symbol.for('nil') } as const
+  return { type: TokenType.Nil, value: null } as const
 }
 
 function mkIden(identifier: string) {
-  return { type: Symbol.for('iden'), value: identifier } as const
+  return { type: TokenType.Identifier, value: identifier } as const
 }
 
 function mkStr(string: string) {
-  return { type: Symbol.for('str'), value: string } as const
+  return { type: TokenType.String, value: string } as const
 }
 
 function mkNum(number: number) {
-  return { type: Symbol.for('num'), value: number } as const
+  return { type: TokenType.Number, value: number } as const
 }
 
 export default Runtime;

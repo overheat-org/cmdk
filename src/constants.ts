@@ -4,6 +4,7 @@ export enum OptionTypes {
 }
 
 export enum TokenType {
+  Nil,
   Keyword,
   Number,
   String,
@@ -13,6 +14,7 @@ export enum TokenType {
   Hash,
   Identifier,
   Option, 
+  Function
 }
 
 export enum Status {

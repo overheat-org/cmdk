@@ -1,9 +1,13 @@
-import './jsx';
+export * from './jsx';
 import type { Keyword } from './jsx';
 
 const ctx = require.context("./commands", false);
 
-export const commandNames = ctx.keys();
 export const commands = new Map<string, Keyword>(
-  commandNames.map(c => [c, ctx(c).default])
+  ctx.keys().map(k => {
+    const cmd = ctx(k).default;
+    return [cmd.id, cmd];
+  })
 );
+
+export { default as engine } from './engine';

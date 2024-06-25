@@ -1,4 +1,3 @@
-import { commandNames } from "@api";
 import { TokenType } from "@consts";
 
 const isText = (code: number) => (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
@@ -25,8 +24,8 @@ function Lexer(source: string) {
   const peek = () => source[i + 1] ?? '\0';
   const save = (tokenData: BaseToken) => tokens.push(new Token(tokenData.type, tokenData.value));
   const makeKeyword = (text: string) => void save({ type: TokenType.Keyword, value: text });
-  const isKeyword = (text: string) => commandNames.find(n => n == text);
-  const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
+  // const isKeyword = (text: string) => commandNames.find(n => n == text);
+  // const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
   const makeNumber = () => {
     let number = curr();
 
@@ -75,7 +74,7 @@ function Lexer(source: string) {
         text += curr();
       }
 
-      return next(), text;
+      return text;
     }
 
     switch (current) {
@@ -111,12 +110,8 @@ function Lexer(source: string) {
         }
         else if (isText(asciiCode)) {
           const text = makeText();
-
-          if (isKeyword(text)) {
-            makeKeyword(text);
-          } else {
-            makeIdentifier(text);
-          }
+          // TODO: se não é possivel gerar um identificador ao invés de uma keyword, então options não podem ser produzidos
+          makeKeyword(text);
         }
         else {
           throw new Error(`Character ${current} is unknown`);

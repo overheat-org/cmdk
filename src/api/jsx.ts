@@ -29,13 +29,13 @@ function KeywordElement(props, children) {
 	const keyword = new Keyword(props.id);
 
 	for (const child of children) {
-		switch (child.type) {
-			case ElementType.Keyword:
+		switch (true) {
+			case child instanceof Keyword:
 				keyword.children.set(child.id, child);
 				break;
 
-			case ElementType.Option:
-				keyword.options[child.id] = child.value;
+			case child instanceof Option:
+				keyword.options[child.id] = child.type;
 				break;
 
 			default:

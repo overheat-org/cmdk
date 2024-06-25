@@ -1,22 +1,25 @@
-import Lexer from "./Lexer";
+import type { Token } from "./Lexer";
 import { TokenType } from "@consts";
 import { Node, OptionsExpressionNode, KeywordNode, IdentifierNode, UserExpressionNode, ChannelExpressionNode, PathExpressionNode, StringLiteralNode, NumberLiteralNode, ScriptNode } from './Ast';
 
 class ParserError extends Error {}
 
-function Parser(source: string) {
-  const tokens = Lexer(source);
+function Parser(_tokens: Token[]) {
+  const tokens = [..._tokens];
 
   const at = () => tokens[0];
   const eat = () => tokens.shift();
   const expect = (types: TokenType[], err: unknown = 'Unexpected Element') => {
-    const prev = tokens[0];
+    const prev = tokens[0] ?? 'nil';
 
     if (!prev || !types.includes(prev.type)) {
       throw new ParserError(`${err}: ${prev.toString()}\nExpecting: ${types.map(t => TokenType[t]).join(', ')}`);
     }
 
     return prev;
+  }
+  const error = (err: string) => {
+    throw new ParserError(err);
   }
 
   const ast = new ScriptNode();
@@ -30,19 +33,19 @@ function Parser(source: string) {
         const keyword = eat();
 
         let options: { [key: string]: unknown } = {};
-        let children: Node | null = null;
+        let children: Node | undefined = undefined;
 
-        while (at().type == TokenType.Identifier) {
+        while (at()?.type == TokenType.Identifier) {
           const elem = parse();
 
           if (elem.kind === 'OptionsExpression') {
             options = elem.value;
           } else {
-            children = elem;
+            error('Expected OptionsExpression');
           }
         }
 
-        if (!children) {
+        if (!children && at() != undefined) {
           expect([TokenType.Keyword, TokenType.String, TokenType.Number]);
           children = parse();
         }
