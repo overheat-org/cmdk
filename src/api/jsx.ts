@@ -1,4 +1,4 @@
-import { Keyword, Option } from "./engine/Elements";
+import { Keyword, Option } from "./engine";
 
 function KeywordElement(props, children) {
 	const keyword = new Keyword(props.id);

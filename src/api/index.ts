@@ -1,6 +1,5 @@
+import './jsx';
 import { Keyword } from './engine';
-
-export * from './jsx';
 
 const ctx = require.context("./commands", false);
 

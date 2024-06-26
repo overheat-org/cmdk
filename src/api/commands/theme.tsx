@@ -1,9 +1,9 @@
 import { Status } from "@consts";
-import { Api } from "../../lib/discord";
+import { Api } from "@lib/discord";
 
-enum ThemeMode {
-	Light = "agYIAhABGgA=",
-	Dark  = "agYIARABGgA=",
+const ThemeMode = {
+	Light: "agYIAhABGgA=",
+	Dark: "agYIARABGgA=",
 }
 
 export default 
