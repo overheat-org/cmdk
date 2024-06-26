@@ -2,8 +2,9 @@ import { TokenType } from "@consts";
 
 const isText = (code: number) => (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 const isNumber = (code: number) => code >= 48 && code <= 57;
+const dashCode = 45; // -
 
-export class BaseToken {
+export abstract class BaseToken {
   constructor(
     public type: TokenType,
     public value?: string | number
@@ -15,6 +16,7 @@ export class Token extends BaseToken {
   }
 };
 
+// TODO: retornar erros em objeto ao invés de lançá-los
 function Lexer(source: string) {
   let i = 0;
   const tokens = new Array<Token>();
@@ -22,8 +24,8 @@ function Lexer(source: string) {
   const curr = () => source[i];
   const next = () => source[++i] ?? '\0';
   const peek = () => source[i + 1] ?? '\0';
-  const save = (tokenData: BaseToken) => tokens.push(new Token(tokenData.type, tokenData.value));
-  const makeKeyword = (text: string) => void save({ type: TokenType.Keyword, value: text });
+  const save = (tokenData: BaseToken) => void tokens.push(new Token(tokenData.type, tokenData.value));
+  const makeKeyword = (text: string) => save({ type: TokenType.Keyword, value: text });
   // const isKeyword = (text: string) => commandNames.find(n => n == text);
   // const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
   const makeNumber = () => {
@@ -48,10 +50,9 @@ function Lexer(source: string) {
     }
 
     save({ type: TokenType.Number, value: Number(number) });
-    next();
   };
 
-  while (i <= source.length) {
+  while (i < source.length) {
     const current = curr();
 
     const makeString = () => {
@@ -62,23 +63,27 @@ function Lexer(source: string) {
         value += curr();
       }
 
-      save({ type: TokenType.String, value });
       next();
+      save({ type: TokenType.String, value });
     }
     const makeText = () => {
       let text = current;
 
-      const dashCode = 45; // -
-
-      while (isText(next().charCodeAt(0)) || next().charCodeAt(0) == dashCode) {
-        text += curr();
+      while (isText(peek().charCodeAt(0)) || peek().charCodeAt(0) == dashCode) {
+        text += next();
       }
 
+      next();
       return text;
     }
 
     switch (current) {
       case ' ':
+        next();
+        break;
+
+      case '=':
+        save({ type: TokenType.Equal });
         next();
         break;
 

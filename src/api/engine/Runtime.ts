@@ -27,11 +27,8 @@ function Runtime(ast: ScriptNode) {
       case "PathExpression":
         return evaluatePathExpression(node);
 
-      case "StringLiteral":
-        return mkStr(node.value);
-
-      case "NumberLiteral":
-        return mkNum(node.value);
+      case undefined:
+        return mkNull();
 
       default:
         throw new RuntimeError(`Unknown AST node kind: ${node['kind']}`);
@@ -70,7 +67,6 @@ function Runtime(ast: ScriptNode) {
 export type MkUnion = ReturnType<
   | typeof mkFn 
   | typeof mkNull
-  | typeof mkIden 
   | typeof mkStr
   | typeof mkNum
 >
@@ -81,10 +77,6 @@ function mkFn(fn: (...args: unknown[]) => unknown) {
 
 function mkNull() {
   return { type: TokenType.Nil, value: null } as const
-}
-
-function mkIden(identifier: string) {
-  return { type: TokenType.Identifier, value: identifier } as const
 }
 
 function mkStr(string: string) {

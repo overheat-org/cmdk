@@ -17,37 +17,41 @@ export class Engine {
         let lastKeyword: Keyword | undefined;
         evaluate(ast);
 
-        const choices = lastKeyword
-            ? Array.from(lastKeyword.children.keys())
-            : [];
+        const choices = Array.from(lastKeyword
+            ? lastKeyword.children.keys()
+            : commands.keys()
+        );
 
-        return lastToken ? choices.filter(choice => choice.includes(lastToken.value as string)) : choices;
+        return lastToken ? choices.filter(choice => choice.startsWith(lastToken.value as string)) : choices;
 
-        function evaluate(node: Node) {
-            switch (node.kind) {
-                case "Script": evaluate(node.children!);
-                case "Keyword": lastKeyword = lastKeyword 
-                    ? lastKeyword.children.get((node as KeywordNode).id)! 
-                    : commands.get((node as KeywordNode).id)!;
+        function evaluate(node?: Node) {
+            switch (node?.kind) {
+                case "Script": {
+                    evaluate(node.children);
+                    break;
+                }
+                case "Keyword": {
+                    lastKeyword = lastKeyword 
+                        ? lastKeyword.children.get((node as KeywordNode).id)! 
+                        : commands.get((node as KeywordNode).id)!;
+                    break;
+                }
+                default: break
             }
         }
     }
 
-    get(source: string) {
+    run(source: string) {
         const tokens = Lexer(source);
         const ast = Parser(tokens);
-        return Runtime(ast);
-    }
-
-    run(source: string) {
-        const r = this.get(source);
+        const result = Runtime(ast);
         
-        switch (r.type) {
+        switch (result.type) {
             case TokenType.Function:
-                return r.value();
+                return result.value();
             
             default:
-                return r.value;
+                return result.value;
         }
     }
 }

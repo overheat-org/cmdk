@@ -41,8 +41,9 @@ function App() {
     }, [handleKeyDown]);
 
     useEffect(() => {
-        const result = query.length != 0 ? [] : [];
-        setElements(result);
+        const result = query.length != 0 ? engine.search(query) : [];
+        console.log({result})
+        // setElements(result);
     }, [query]);
 
     return (

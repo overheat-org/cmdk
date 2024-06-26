@@ -1,6 +1,7 @@
 import type { Token } from "./Lexer";
 import { TokenType } from "@consts";
 import { Node, OptionsExpressionNode, KeywordNode, IdentifierNode, UserExpressionNode, ChannelExpressionNode, PathExpressionNode, StringLiteralNode, NumberLiteralNode, ScriptNode } from './Ast';
+import Lexer from "./Lexer";
 
 class ParserError extends Error {}
 
@@ -23,12 +24,12 @@ function Parser(_tokens: Token[]) {
   }
 
   const ast = new ScriptNode();
-  ast.children = parse();
+  if(at()) ast.children = parse();
 
   return ast;
 
   function parse(): Node {
-    switch (at().type) {
+    switch (at()?.type) {
       case TokenType.Keyword: {
         const keyword = eat();
 
