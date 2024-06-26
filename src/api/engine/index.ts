@@ -12,7 +12,7 @@ export class Engine {
         const tokens = Lexer(source);
         const lastToken = source[source.length - 1] == ' ' ? undefined : tokens.pop()!;
 
-        const ast = Parser(tokens);
+        const ast = Parser.from(tokens);
 
         let lastKeyword: Keyword | undefined;
         evaluate(ast);
@@ -42,8 +42,7 @@ export class Engine {
     }
 
     run(source: string) {
-        const tokens = Lexer(source);
-        const ast = Parser(tokens);
+        const ast = Parser(source);
         const result = Runtime(ast);
         
         switch (result.type) {

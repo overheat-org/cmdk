@@ -25,9 +25,7 @@ function Lexer(source: string) {
   const next = () => source[++i] ?? '\0';
   const peek = () => source[i + 1] ?? '\0';
   const save = (tokenData: BaseToken) => void tokens.push(new Token(tokenData.type, tokenData.value));
-  const makeKeyword = (text: string) => save({ type: TokenType.Keyword, value: text });
-  // const isKeyword = (text: string) => commandNames.find(n => n == text);
-  // const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
+  const makeIdentifier = (text: string) => void save({ type: TokenType.Identifier, value: text });
   const makeNumber = () => {
     let number = curr();
 
@@ -115,8 +113,8 @@ function Lexer(source: string) {
         }
         else if (isText(asciiCode)) {
           const text = makeText();
-          // TODO: se não é possivel gerar um identificador ao invés de uma keyword, então options não podem ser produzidos
-          makeKeyword(text);
+
+          makeIdentifier(text);
         }
         else {
           throw new Error(`Character ${current} is unknown`);
