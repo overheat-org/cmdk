@@ -5,52 +5,56 @@ import Parser from "./Parser";
 import Runtime from "./Runtime";
 import { TokenType } from "@consts";
 import { Keyword } from "./Elements";
+import { NotOk, Ok } from "@lib/utils";
 
 // TODO: Otimizar a engine reutilizando a ast e tokens do search para usar no run e no get
 export class Engine {
     search(source: string) {
-        const tokens = Lexer(source);
-        const lastToken = source[source.length - 1] == ' ' ? undefined : tokens.pop()!;
+        const [tokens, errors] = Lexer(source);
+        if(errors) return NotOk(errors);
+        
+        const lastToken = source[source.length - 1] == ' ' ? undefined : tokens.pop();
 
-        const ast = Parser.from(tokens);
+        const [ast, errors2] = Parser.from(tokens);
+        if(errors2) return NotOk(errors2);
 
         let lastKeyword: Keyword | undefined;
-        evaluate(ast);
+        lastKeyword = evaluate(ast);
 
         const choices = Array.from(lastKeyword
             ? lastKeyword.children.keys()
             : commands.keys()
         );
 
-        return lastToken ? choices.filter(choice => choice.startsWith(lastToken.value as string)) : choices;
+        return Ok(lastToken ? choices.filter(choice => choice.startsWith(lastToken.value as string)) : choices)   
 
         function evaluate(node?: Node) {
             switch (node?.kind) {
                 case "Script": {
-                    evaluate(node.children);
-                    break;
+                    return evaluate(node.children);
                 }
                 case "Keyword": {
-                    lastKeyword = lastKeyword 
+                    return lastKeyword 
                         ? lastKeyword.children.get((node as KeywordNode).id)! 
                         : commands.get((node as KeywordNode).id)!;
-                    break;
                 }
-                default: break
             }
         }
     }
 
     run(source: string) {
-        const ast = Parser(source);
-        const result = Runtime(ast);
+        const [ script, errors ] = Parser(source);
+        if(errors) return NotOk(errors);
+
+        const [ result, errors2 ] = Runtime(script!);
+        if(errors2) return NotOk(errors2); 
         
         switch (result.type) {
             case TokenType.Function:
-                return result.value();
+                return Ok(result.value());
             
             default:
-                return result.value;
+                return Ok(result.value);
         }
     }
 }

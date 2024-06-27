@@ -2,13 +2,14 @@ import { ScriptNode, Node, ChannelExpressionNode, KeywordNode, PathExpressionNod
 import { commands } from "@api";
 import { TokenType } from "@consts";
 import { Keyword, Option } from "./Elements";
-
-class RuntimeError extends Error {}
+import { GenericError, NotOk, Ok } from "@lib/utils";
 
 function Runtime(ast: ScriptNode) {
+  const errors = new Array<GenericError>();
   let lastKeyword: Keyword | Option;
 
-  return evaluate(ast);
+  const result = evaluate(ast);
+  return errors.length == 0 ? Ok(result) : NotOk(errors);
 
   function evaluate(node: Node): MkUnion {
     switch (node.kind) {
@@ -31,7 +32,8 @@ function Runtime(ast: ScriptNode) {
         return mkNull();
 
       default:
-        throw new RuntimeError(`Unknown AST node kind: ${node['kind']}`);
+        errors.push({ type: 'runtime', value: `Unknown AST node kind: ${node['kind']}` });
+        return mkNull();
     }
   }
 

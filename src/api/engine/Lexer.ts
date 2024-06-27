@@ -1,4 +1,5 @@
 import { TokenType } from "@consts";
+import { GenericError, NotOk, Ok } from "@lib/utils";
 
 const isText = (code: number) => (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 const isNumber = (code: number) => code >= 48 && code <= 57;
@@ -20,6 +21,7 @@ export class Token extends BaseToken {
 function Lexer(source: string) {
   let i = 0;
   const tokens = new Array<Token>();
+  const errors = new Array<GenericError>();
 
   const curr = () => source[i];
   const next = () => source[++i] ?? '\0';
@@ -117,13 +119,13 @@ function Lexer(source: string) {
           makeIdentifier(text);
         }
         else {
-          throw new Error(`Character ${current} is unknown`);
+          errors.push({ type: 'lexer', value: `Character ${current} is unknown` });
         }
       };
     }
   }
 
-  return tokens;
+  return errors.length == 0 ? Ok(tokens) : NotOk(errors);
 }
 
 export default Lexer;

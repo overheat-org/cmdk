@@ -12,20 +12,28 @@ import {
   ScriptNode,
 } from "./Ast";
 import Lexer from "./Lexer";
-
-class ParserError extends Error {}
+import { GenericError, NotOk, Ok, ReturnController } from "@lib/utils";
 
 class _Parser {
   static parse(source: string) {
-    const tokens = Lexer(source);
-    return this.from(tokens);
+    const [tokens, errors] = Lexer(source);
+
+    if(errors) {
+      return NotOk(errors);
+    }
+
+    return this.from(tokens!);
   }
   
   static from(_tokens: Token[]) {
     const tokens = [..._tokens];
+    const errors = new Array<GenericError>();
 
     const at = (n = 0) => tokens[n];
     const eat = () => tokens.shift();
+    const error = (err: string) => {
+      errors.push({ type: 'parser', value: err });
+    };
     const expect = (
       types: TokenType[],
       err: unknown = "Unexpected Element"
@@ -33,25 +41,20 @@ class _Parser {
       const prev = tokens[0] ?? "nil";
 
       if (!prev || !types.includes(prev.type)) {
-        throw new ParserError(
-          `${err}: ${prev.toString()}\nExpecting: ${types
-            .map((t) => TokenType[t])
-            .join(", ")}`
+        error(
+          `${err}: ${prev.toString()}\nExpecting: ${types.map((t) => TokenType[t]).join(", ")}`
         );
       }
 
       return prev;
     };
-    const error = (err: string) => {
-      throw new ParserError(err);
-    };
 
     const ast = new ScriptNode();
     if (at()) ast.children = _parse();
 
-    return ast;
+    return errors.length == 0 ? Ok(ast) : NotOk(errors);
 
-    function _parse(): Node {
+    function _parse(): Node | undefined {
       switch (at()?.type) {
         case TokenType.Identifier: {
           let id = eat()!.value as string;
@@ -82,7 +85,7 @@ class _Parser {
             while (at()?.type == TokenType.Identifier) {
               const elem = _parse();
 
-              switch (elem.kind) {
+              switch (elem?.kind) {
                 case "OptionsExpression":
                   options = elem.value;
                   break;
@@ -109,7 +112,7 @@ class _Parser {
           eat();
 
           if (at().type != TokenType.Identifier) {
-            throw new ParserError("Incorrect use of decorator");
+            error("Incorrect use of decorator");
           }
 
           return new UserExpressionNode(eat()!.value as string);
@@ -119,9 +122,9 @@ class _Parser {
           eat();
 
           if (at().type != TokenType.Identifier) {
-            throw new Error("Incorrect use of hash");
+            error("Incorrect use of hash");
           }
-
+            
           return new ChannelExpressionNode(eat()!.value as string);
         }
 
@@ -132,7 +135,7 @@ class _Parser {
             eat();
 
             if (at().type != TokenType.Identifier) {
-              throw new Error("Incorrect use of ArrowRight");
+              error("Incorrect use of ArrowRight");
             }
 
             path.push(eat()!.value as string);
@@ -156,7 +159,7 @@ class _Parser {
         }
 
         default: {
-          throw new ParserError(`Unknown token "${JSON.stringify(at())}"`);
+          error(`Unknown token "${JSON.stringify(at())}"`);
         }
       }
     }
@@ -165,10 +168,10 @@ class _Parser {
 
 interface Parser {
   /** Parse only extern tokens instead parse source too */
-  from(tokens: Token[]): ScriptNode
+  from(tokens: Token[]): ReturnController<ScriptNode>
 
   /** Use lexer to get tokens and parse it */
-  (source: string): ScriptNode
+  (source: string): ReturnController<ScriptNode>
 }
 
 const Parser: Parser = (source) => _Parser.parse(source);

@@ -30,7 +30,8 @@ function App() {
             
             case open && e.key == 'Enter':
                 e.stopPropagation();
-                setReturned(engine.run(query) as string);
+                const [result, errors] = engine.run(query);
+                setReturned(String(result!));
                 break;
         }
     };
@@ -41,9 +42,19 @@ function App() {
     }, [handleKeyDown]);
 
     useEffect(() => {
-        const result = query.length != 0 ? engine.search(query) : [];
-        console.log({result})
-        // setElements(result);
+        let elements = new Array<string>();
+
+        if(query.length > 0) {
+            const [result, errors] = engine.search(query);
+            
+            if(errors) {
+                errors.forEach(console.error);
+            } else {
+                elements = result; 
+            }
+        }
+        
+        setElements(elements);
     }, [query]);
 
     return (
